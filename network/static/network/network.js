@@ -1,22 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // Add events for the navbar
-    document.querySelector('#home').addEventListener('click', () => load_posts('posts'))
-    document.querySelector('#allPosts').addEventListener('click', () => load_posts('posts'))
+    document.querySelector('#home').addEventListener('click', () => load_posts('posts', '1'))
+    document.querySelector('#allPosts').addEventListener('click', () => load_posts('posts', '1'))
     if (document.querySelector('#userFollowing') !== null) {
-        document.querySelector('#userFollowing').addEventListener('click', () => load_posts('following'))
+        document.querySelector('#userFollowing').addEventListener('click', () => load_posts('following', '1'))
     }
     if (document.querySelector('#create') !== null) {
         document.querySelector('#create').addEventListener('click', create_post)
     }
   
     // By default, load the feed
-    load_posts('posts');
+    load_posts('posts', '1');
    
 })
 
 
-const load_posts = (posts) => {
+const load_posts = (posts, page) => {
     // Display feed layout
     if (document.getElementById('createPost') && 
         document.getElementById('feed') !== null)
@@ -32,7 +32,7 @@ const load_posts = (posts) => {
         
     
         // Get all posts or following posts
-        fetch(`/${posts}`)
+        fetch(`${posts}/${page}`)
         .then(res => res.json())
         .then(data => {
             console.log(data)
@@ -48,16 +48,29 @@ const load_posts = (posts) => {
                     const likeBtn = document.createElement('button')
                     likeBtn.setAttribute('id', post.id)
                     
+                    // Like and unlike logic
                     if (post.likes.includes(data[1].logged_user)) {
-
                         likeBtn.innerHTML= 'Unlike'
-                        likeBtn.className = 'btn btn-danger'
-                        likeBtn.onclick = () => like_post(post.id, 'unlike')
-                        
+                        likeBtn.className = 'btn btn-danger'       
                     } else {
                         likeBtn.innerHTML= 'Like'
                         likeBtn.className = 'btn btn-primary'
-                        likeBtn.onclick = () => like_post(post.id, 'like')
+                    }
+
+                    likeBtn.onclick = () => {
+ 
+                        if (likeBtn.innerHTML === 'Unlike') {
+
+                            like_post(post.id, 'unlike')
+                            likeBtn.innerHTML = 'Like'
+                            likeBtn.className = 'btn btn-primary'
+
+                        } else if (likeBtn.innerHTML === 'Like') {
+
+                            like_post(post.id, 'like')
+                            likeBtn.innerHTML = 'Unlike'
+                            likeBtn.className = 'btn btn-danger'
+                        }
                     }
 
                     // Create edit button for the author and add event
@@ -90,11 +103,13 @@ const load_posts = (posts) => {
                     const postLikes = document.createElement('p')
                     postLikes.innerHTML = post.likes.length
 
-                    const postComments = document.createElement('p')
-                    postComments.innerHTML = post.comments.length
+                    // TODO: add comments functionality
+
+                    // const postComments = document.createElement('p')
+                    // postComments.innerHTML = post.comments.length
 
                     // Append all elements to the post container
-                    postCard.append(postAuthor, postBody, postTime, postLikes, likeBtn, editBtn, postComments)
+                    postCard.append(postAuthor, postBody, postTime, postLikes, likeBtn, editBtn)
                 
                     // Display post container on the page
                     document.getElementById('feed').appendChild(postCard)
@@ -106,18 +121,27 @@ const load_posts = (posts) => {
                     } 
 
                 })
+
+                // Hide prev or next buttons if there are no more pages
+                // else fetch the next pages
+                if (data[0].page === data[0].num_pages) {
+                    document.getElementById('next').style.display = 'none'
+                } else {
+                    document.getElementById('next').style.display = 'block'
+                    document.getElementById('next').onclick = () => load_posts(posts, data[0].page + 1)
+                }
+                if (data[0].page === 1) {
+                    document.getElementById('prev').style.display = 'none'
+                } else {
+                    document.getElementById('prev').style.display = 'block'
+                    document.getElementById('prev').onclick = () => load_posts(posts, data[0].page - 1)
+                }
+
+                document.getElementById('currentPage').innerHTML = `Page ${data[0].page} of ${data[0].num_pages}`
+
             } else {
                 document.getElementById('feed').innerHTML = '<h2>You\'re following list is empty</h2>'
             }
-
-            document.getElementById('pageNav').innerHTML = `
-            <ul class="pagination">
-                <li class="page-item"><a class="page-link" href="?page=${data[0].page - 1}">Previous</a></li>
-                
-    
-                <li class="page-item"><a class="page-link" href="?page=${data[0].page + 1}">Next</a></li>
-            </ul>
-            `
 
         })
         .catch(err => console.log(err))
@@ -136,7 +160,7 @@ const create_post = () => {
     document.getElementById('pageNav').style.display = 'none'
     document.getElementById('backBtn').style.display = 'block'
 
-    document.getElementById('backBtn').onclick = () => load_posts('posts')
+    document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 }
 
 
@@ -151,7 +175,7 @@ const show_profile = (name) => {
     document.getElementById('pageNav').style.display = 'none'
     document.getElementById('backBtn').style.display = 'block'
 
-    document.getElementById('backBtn').onclick = () => load_posts('posts')
+    document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 
     // fetch data of the user
     fetch(`/profile/${name}`)
@@ -251,13 +275,12 @@ const follow_user = (user, action) => {
 // Like Post
 const like_post = (id, action) => {
 
-    fetch('/posts', {
+    fetch('/posts/1', {
         method: 'PUT',
         body: JSON.stringify({
             "action": [action, id],
         })
     })
-    .then(() => load_posts('posts'))
 
 }
 
@@ -271,7 +294,7 @@ const edit_post = (post) => {
     document.getElementById('editForm').style.display = 'block'
     document.getElementById('backBtn').style.display = 'block'
 
-    document.getElementById('backBtn').onclick = () => load_posts('posts')
+    document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 
     // Get post text, id, and textarea and fill in with the text
     const EditedText = document.getElementById('editText')
@@ -289,7 +312,7 @@ const edit_post = (post) => {
                 "newText": EditedText.value
             })
         })
-        .then(() => load_posts('posts'))
+        .then(() => load_posts('posts', '1'))
 
     })
 }
