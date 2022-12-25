@@ -1,0 +1,10 @@
+textarea{
+    width: 100%;
+}
+a{
+    cursor: pointer;
+}
+
+.post-username{
+    cursor: pointer;
+}

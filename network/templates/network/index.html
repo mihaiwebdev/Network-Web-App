@@ -1,0 +1,53 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    
+    <button id="backBtn" class="btn btn-warning mb-5 mt-3">Go back</button>
+
+    <div id="feed">
+    </div>
+    <nav aria-label="Page navigation" id="pageNav">
+        
+    </nav>
+   
+
+    <div id="createPost">
+
+        <h1>New Post</h1>
+
+        <form id="compose-form" action="{% url 'create-post' %}" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <textarea name="text" id="compose-body" cols="10" placeholder="What are you thinking?..."></textarea>
+            </div>
+            <input type="submit" value="Submit">
+
+        </form>
+        
+    </div>
+
+    <div id="showProfile">
+        <h3 id="userName"></h3>
+        <p id="followers"></p>
+        <p id="following"></p>
+        <button id="follow" class="d-none"></button>
+        
+        <div id="posts"></div>
+     
+    </div>
+
+  
+    <form id="editForm">
+
+        <h2>Edit post</h2>
+        <textarea id="editText" cols="10"></textarea>
+        <input type="submit" value="Edit">
+    </form>
+
+
+    
+
+
+
+{% endblock %}
+
