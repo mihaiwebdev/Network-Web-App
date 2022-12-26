@@ -1,10 +1,142 @@
-textarea{
-    width: 100%;
-}
+/* Global */
+
 a{
     cursor: pointer;
+}
+body {
+    background-color: #0c1013;
+    color: #f3f3f3;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    background-color:#1B9CFC ;
+}
+
+.navbar-dark .navbar-toggler{
+    border:none;    
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: #fff;
 }
 
 .post-username{
     cursor: pointer;
+}
+
+
+#backBtn {
+    background-color: transparent;
+    padding: 0;
+    font-size: 18px;  
+}
+
+
+/* Post */
+
+.post-card{
+  
+    border-top: 1px solid #485460;
+    padding: 20px 0px;
+}
+
+.fa-user-ninja {
+
+    color: #1B9CFC;
+    border-radius: 50%;
+    padding: 12px;
+    background-color: #CAD3C8;
+    
+}
+.post-body {
+    margin-left: 15px;
+}
+
+.post-username {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    margin-right: 10px;
+}
+
+.post-timestamp {
+    font-size: 12px;
+    color: #ccc;
+    margin-top: 4px;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.post-text {
+    font-size: 18px;
+    color: #eee;
+    margin: 0;
+    letter-spacing: 0.3px;
+    font-weight: lighter;
+    margin-bottom: 5px;
+    
+}
+
+.post-actions {
+    display: flex;
+}
+.post-actions>p {
+    margin:0px 20px ;
+}
+
+.fa-heart{
+    margin-top: 4px;
+}
+.fa-solid.fa-heart{
+    color: #ff3f34;
+}
+.fa-heart:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.edit-btn {
+    cursor: pointer;
+}
+
+a:not([href]){
+    color: #1B9CFC;
+}
+
+.page-link {
+    margin: 20px 0px;
+    
+}
+
+.page-item:hover{
+    color: #1B9CFC;
+}
+
+.current-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 10px;
+    margin-top: 14px;
+}
+
+/* Posts */
+textarea{
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    width: 100%;
+    padding: 5px 10px;
+}
+
+input[type=submit] {
+    padding: 10px;
+    border-radius: 10px;
+}
+input[type=submit]:hover {
+    opacity: 0.8;
+    transform: scale(0.98);
 }

@@ -15,7 +15,120 @@ document.addEventListener('DOMContentLoaded', () => {
    
 })
 
+// Create the post layout
+const post_layout = (post, data, page) => {
 
+    // Make the post container
+    const postCard = document.createElement('div')
+    postCard.className = 'd-flex flex-row post-card'
+
+    //  Creat Like button and add logic
+    const likeBtn = document.createElement('i')
+    likeBtn.setAttribute('id', post.id)
+
+    // Likes
+    const likeDiv = document.createElement('div')
+    likeDiv.className = 'd-flex '
+    const postLikes = document.createElement('p')
+    postLikes.className = 'ml-2'
+    postLikes.innerHTML = post.likes.length
+    likeDiv.append(likeBtn,postLikes)
+
+    // Like and unlike logic
+    if (post.likes.includes(data[1].logged_user)) {
+        
+        likeBtn.className = 'fa-solid fa-heart'       
+    } else {
+        
+        likeBtn.className = 'fa-regular fa-heart'
+    }
+
+    likeBtn.onclick = () => {
+
+        if (likeBtn.className === 'fa-solid fa-heart') {
+
+            like_post(post.id, 'unlike')
+            
+            likeBtn.className = 'fa-regular fa-heart'
+
+            postLikes.innerHTML = `${parseInt(postLikes.innerHTML) - 1}`
+
+        } else if (likeBtn.className === 'fa-regular fa-heart') {
+
+            like_post(post.id, 'like')
+            
+            likeBtn.className = 'fa-solid fa-heart'
+
+            postLikes.innerHTML = `${parseInt(postLikes.innerHTML) + 1 }`
+        }
+    }
+
+    // Create edit button for the author and add event
+    const editBtn = document.createElement('p')
+    editBtn.innerHTML = 'Edit'
+
+    if (post.author === data[1].logged_user) {
+
+        editBtn.className = 'edit-btn d-block '
+    }
+    else {
+        editBtn.className = 'edit-btn d-none'
+    }
+    editBtn.onclick = () => edit_post(post)
+
+    // User avatar
+    const postUser = document.createElement('div')
+    postUser.className = 'mt-3'
+    postUser.innerHTML = '<i class="fa-solid fa-user-ninja fa-2x"></i>'
+
+    // Create header with the post author and add event listener
+    const postHeader = document.createElement('div')
+    postHeader.className = 'd-flex flex-row'
+    const postAuthor = document.createElement('h4')
+    postAuthor.className = 'post-username'
+    postAuthor.setAttribute('id', post.author)
+    postAuthor.innerHTML = `${post.author} - `
+    postAuthor.onclick = () => show_profile(postAuthor.id)
+
+    // Create timestamp   
+    const postTime = document.createElement('p')
+    postTime.innerHTML = post.timestamp
+    postTime.className = 'post-timestamp'
+
+    // Append to post header
+    postHeader.append(postAuthor, postTime)
+
+    // Create post text
+    const postText = document.createElement('p')
+    postText.innerHTML = post.text
+    postText.className = 'post-text'
+
+    // Comments
+    const postComments = document.createElement('p')
+    postComments.innerHTML = `<i class="fa-regular fa-comment mr-2"></i>${post.comments.length}`
+    // TODO: add comments functionality
+
+    // Post actions element
+    const postActions = document.createElement('div')
+    postActions.className = 'post-actions'
+    postActions.append(likeDiv, postComments, editBtn)
+
+    // Create post body container
+    const postBody = document.createElement('div')
+    postBody.className = 'post-body'
+
+    // Append elements to post body container
+    postBody.append(postHeader, postText, postActions)
+
+    // Append all elements to the post container
+    postCard.append(postUser, postBody)
+
+    // Display post container on the page
+    document.getElementById(page).appendChild(postCard)
+}
+
+
+// Load the requested posts
 const load_posts = (posts, page) => {
     // Display feed layout
     if (document.getElementById('createPost') && 
@@ -35,84 +148,13 @@ const load_posts = (posts, page) => {
         fetch(`${posts}/${page}`)
         .then(res => res.json())
         .then(data => {
-            console.log(data)
+        
             if (data.length > 0) {
                 
                 data[0].posts.forEach(post => {
-            
-                    // Make the post container
-                    const postCard = document.createElement('div')
-                    postCard.className = 'd-flex flex-column'
-
-                    //  Creat Like button and add logic
-                    const likeBtn = document.createElement('button')
-                    likeBtn.setAttribute('id', post.id)
                     
-                    // Like and unlike logic
-                    if (post.likes.includes(data[1].logged_user)) {
-                        likeBtn.innerHTML= 'Unlike'
-                        likeBtn.className = 'btn btn-danger'       
-                    } else {
-                        likeBtn.innerHTML= 'Like'
-                        likeBtn.className = 'btn btn-primary'
-                    }
-
-                    likeBtn.onclick = () => {
- 
-                        if (likeBtn.innerHTML === 'Unlike') {
-
-                            like_post(post.id, 'unlike')
-                            likeBtn.innerHTML = 'Like'
-                            likeBtn.className = 'btn btn-primary'
-
-                        } else if (likeBtn.innerHTML === 'Like') {
-
-                            like_post(post.id, 'like')
-                            likeBtn.innerHTML = 'Unlike'
-                            likeBtn.className = 'btn btn-danger'
-                        }
-                    }
-
-                    // Create edit button for the author and add event
-                    const editBtn = document.createElement('button')
-                    editBtn.innerHTML = 'Edit'
-
-                    if (post.author === data[1].logged_user) {
-
-                        editBtn.className = 'd-block btn btn-secondary'
-                    }
-                    else {
-                        editBtn.className = 'd-none'
-                    }
-                    editBtn.onclick = () => edit_post(post)
-
-                    // Create header with the psot author and add event listener
-                    const postAuthor = document.createElement('h4')
-                    postAuthor.className = 'post-username'
-                    postAuthor.setAttribute('id', post.author)
-                    postAuthor.innerHTML = post.author
-                    postAuthor.onclick = () => show_profile(postAuthor.id)
-
-                    // Create post content, timestamp, likes and comments
-                    const postBody = document.createElement('p')
-                    postBody.innerHTML = post.text
-
-                    const postTime = document.createElement('small')
-                    postTime.innerHTML = post.timestamp
-
-                    const postLikes = document.createElement('p')
-                    postLikes.innerHTML = post.likes.length
-
-                    // TODO: add comments functionality
-
-                    // const postComments = document.createElement('p')
-                    // postComments.innerHTML = post.comments.length
-
-                    // Append all elements to the post container
-                    postCard.append(postAuthor, postBody, postTime, postLikes, likeBtn, editBtn)
-                
-                    // Display post container on the page
-                    document.getElementById('feed').appendChild(postCard)
+                    // Make post card for each post
+                    post_layout(post, data, 'feed')
 
                     // Add event listener for cliking the username
                     if (document.getElementById('userProfile') !== null) {
@@ -181,14 +223,21 @@ const show_profile = (name) => {
     fetch(`/profile/${name}`)
     .then(res => res.json())
     .then(data => {
-    
-        document.getElementById('userName').innerHTML = data[0].username
-        document.getElementById('followers').innerHTML = data[0].followers.length
-        document.getElementById('following').innerHTML = data[0].following.length
 
+        // Get the user data
+        const userName = document.getElementById('userName')
+        userName.innerHTML = `${data[0].username}'s profile`
+
+        const followers = document.getElementById('followers')
+        followers.innerHTML = `Followers - ${data[0].followers.length}`
+        
+
+        const following = document.getElementById('following')
+        following.innerHTML = `Following - ${data[0].following.length}`
+
+        // Empty the page
         document.getElementById('posts').innerHTML = ''
  
-
         // Show follow button for other users than the author
         if (data[1].logged_user !== data[0].username) {
             document.getElementById('follow').className = 'd-block'
@@ -214,43 +263,8 @@ const show_profile = (name) => {
         // Create the html layout with user's data
         data[2].map(post => {
 
-                // Create and fill in the post card for every post
-                const postCard = document.createElement('div')
-                postCard.className = 'd-flex flex-column'
+            post_layout(post, data, 'posts')
 
-                const likeBtn = document.createElement('button')
-                likeBtn.setAttribute('id', post.id)
-                likeBtn.innerHTML= 'Like'
-                likeBtn.className = 'btn btn-primary'
-
-                // Create edit button for the author and add event
-                const editBtn = document.createElement('button')
-                editBtn.innerHTML = 'Edit'
-                editBtn.onclick = () => edit_post(post)
-
-                // Show edit button for the author and hide for other userr
-                if (data[1].logged_user !== data[0].username) {
-                    editBtn.className = 'd-none'
-                    
-                } else {
-                    editBtn.className = 'd-block btn btn-secondary'
-                }
-
-                const postBody = document.createElement('p')
-                postBody.innerHTML = post.text
-
-                const postTime = document.createElement('small')
-                postTime.innerHTML = post.timestamp
-
-                const postLikes = document.createElement('p')
-                postLikes.innerHTML = post.likes.length
-
-                const postComments = document.createElement('p')
-                postComments.innerHTML = post.comments.length
-
-                postCard.append(postBody, postTime, postLikes, likeBtn, editBtn, postComments)
-
-                document.getElementById('posts').append(postCard)
         })
 
     })
