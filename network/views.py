@@ -167,10 +167,13 @@ def create_post(request):
 
     # Get and check content
     text = request.POST["text"]
-
-    # Create and save the post
-    post = Post(author=request.user, text=text)
-    post.save()
+    
+    if len(text) < 1:
+        return JsonResponse({"err": "Field can't be empty"})
+    else:
+        # Create and save the post
+        post = Post(author=request.user, text=text)
+        post.save()
 
     return HttpResponseRedirect(reverse("index"))
 
