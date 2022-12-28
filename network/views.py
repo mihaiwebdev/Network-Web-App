@@ -70,12 +70,11 @@ def register(request):
         return render(request, "network/register.html")
 
 
-@csrf_exempt
 def posts(request, posts, page_num):
 
     if request.method == "GET":
         
-        # Return all posts
+        # Get all posts
         if posts == 'posts':
 
             # Get posts objects to paginate
@@ -97,7 +96,7 @@ def posts(request, posts, page_num):
                 },
                 {"logged_user": request.user.username}], safe=False)
 
-        # Return following posts
+        # Get following posts
         elif posts == 'following':
 
             if request.user.is_authenticated:
@@ -135,8 +134,8 @@ def posts(request, posts, page_num):
         else:
             return JsonResponse({"error": "Page does not exists"})
 
-
-    if request.method == 'PUT':
+    # Handle put method for like and unlike
+    elif request.method == 'PUT':
         if request.user.is_authenticated:
 
             # Get the post 
@@ -154,6 +153,9 @@ def posts(request, posts, page_num):
 
         else:
             return HttpResponseRedirect(reverse('login'))
+    
+    else:
+        return HttpResponse(status=404)
 
 
 @login_required
@@ -166,61 +168,89 @@ def create_post(request):
     # Get and check content
     text = request.POST["text"]
 
+    # Create and save the post
     post = Post(author=request.user, text=text)
     post.save()
 
     return HttpResponseRedirect(reverse("index"))
 
 
-def profile(request, username):
+def profile(request, username, page_num):
 
     # Send user json data
     if request.method == 'GET':
+
+        # Get user profile
         user = User.objects.filter(username=username).first()
+
         user_profile = User_profile.objects.filter(user=user).first()
+        
+        # Get user posts to paginate
         user_posts = Post.objects.filter(
             author=user).all().order_by("-timestamp")
 
+        # Create paginator for 10 posts per page
+        paginator = Paginator(user_posts, 10)
+
+        page = paginator.page(page_num)
+
+        # Serialize the page's posts to a list of dicts
+        serialized_posts = [post.serialize() for post in page.object_list]
+
         return JsonResponse([user_profile.serialize(), {"logged_user": request.user.username},
-                             [post.serialize() for post in user_posts]], safe=False)
+                             {
+                                "posts":serialized_posts,
+                                "page": page_num,
+                                "num_pages":paginator.num_pages,
+                                "count": paginator.count,
+                             }], safe=False)
 
 
-@csrf_exempt
-@login_required
 def follow_user(request, follow_user):
 
-    # Get follower and followed
-    if request.method == 'PUT':
-        follower = User.objects.get(pk=request.user.id)
-        follower_user = User_profile.objects.get(user=follower)
-        followed_user = User.objects.get(username=follow_user)
-        followed_profile = User_profile.objects.get(user=followed_user)
+    # Check if user is logged in
+    if request.user.is_authenticated:
 
-        data = json.loads(request.body)
-        if data['action'] == 'follow':
-            followed_profile.followers.add(follower)
-            follower_user.following.add(followed_user)
+        if request.method == 'PUT':
 
-            return HttpResponse(status=201)
+                # Get follower and followed profile
+                follower = User.objects.get(pk=request.user.id)
+                follower_user = User_profile.objects.get(user=follower)
+                followed_user = User.objects.get(username=follow_user)
+                followed_profile = User_profile.objects.get(user=followed_user)
 
-        elif data['action'] == 'unfollow':
-            followed_profile.followers.remove(follower)
-            follower_user.following.remove(followed_user)
+                # Follow or unfollow based on the data user sends
+                data = json.loads(request.body)
+            
+                if data['action'] == 'follow':
+                    followed_profile.followers.add(follower)
+                    follower_user.following.add(followed_user)
 
-            return HttpResponse(status=202)
+                    return HttpResponse(status=201)
+
+                elif data['action'] == 'unfollow':
+                    followed_profile.followers.remove(follower)
+                    follower_user.following.remove(followed_user)
+
+                    return HttpResponse(status=202)
+        else:
+
+            return JsonResponse({
+                "error": 'PUT request required'
+            })
 
     else:
-        return JsonResponse({
-            "error": 'PUT request required'
-        })
+       return JsonResponse({
+            "error": "You must be logged in"
+       })
 
 
-@csrf_exempt
 @login_required
 def edit_post(request, post_id):
     
     if request.method == 'PUT':
-    
+
+        # Get the post text and update it in database with the edited one
         data = json.loads(request.body)
         
         try:
