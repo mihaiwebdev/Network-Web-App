@@ -41,7 +41,7 @@ const post_layout = (post, data, page) => {
     postLikes.innerHTML = post.likes.length
     likeDiv.append(likeBtn,postLikes)
 
-    // Like and unlike logic
+    // Check if user liked or not the post
     if (post.likes.includes(data[1].logged_user)) {
         
         likeBtn.className = 'fa-solid fa-heart'       
@@ -50,23 +50,27 @@ const post_layout = (post, data, page) => {
         likeBtn.className = 'fa-regular fa-heart'
     }
 
-    likeBtn.onclick = () => {
+    // Like and unlike logic for logged users
+    if (data[1].logged_user !== '') {
 
-        if (likeBtn.className === 'fa-solid fa-heart') {
-
-            like_post(post.id, 'unlike')
+        likeBtn.onclick = () => {
             
-            likeBtn.className = 'fa-regular fa-heart'
-
-            postLikes.innerHTML = `${parseInt(postLikes.innerHTML) - 1}`
-
-        } else if (likeBtn.className === 'fa-regular fa-heart') {
-
-            like_post(post.id, 'like')
-            
-            likeBtn.className = 'fa-solid fa-heart'
-
-            postLikes.innerHTML = `${parseInt(postLikes.innerHTML) + 1 }`
+            if (likeBtn.className === 'fa-solid fa-heart') {
+                
+                like_post(post.id, 'unlike')
+                
+                likeBtn.className = 'fa-regular fa-heart'
+                
+                postLikes.innerHTML = `${parseInt(postLikes.innerHTML) - 1}`
+                
+            } else if (likeBtn.className === 'fa-regular fa-heart') {
+                
+                like_post(post.id, 'like')
+                
+                likeBtn.className = 'fa-solid fa-heart'
+                
+                postLikes.innerHTML = `${parseInt(postLikes.innerHTML) + 1 }`
+            }
         }
     }
 
