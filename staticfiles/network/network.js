@@ -1,3 +1,6 @@
+document.querySelector('#home').addEventListener('click', () => load_posts('posts', '1'))
+document.querySelector('#allPosts').addEventListener('click', () => load_posts('posts', '1'))
+
 document.addEventListener('DOMContentLoaded', () => {
     
     // Add events for the navbar and footer
@@ -8,18 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('userProfile') !== null) {
         const user = document.getElementById('userProfile').innerText
         document.getElementById('userProfile').onclick = () => show_profile(user, 1)
-        
     } 
+
     if (document.querySelector('#userFollowing') !== null) {
         document.querySelector('#userFollowing').addEventListener('click', () => load_posts('following', '1'))
     }
+
     if (document.querySelector('#create') !== null) {
         document.querySelector('#create').addEventListener('click', create_post)
     }
   
     // By default, load the feed
-    load_posts('posts', '1');
-   
+    if (document.getElementById('login-form') === null 
+        && document.getElementById('register-form') === null) {
+
+        load_posts('posts', '1');
+    }
+
+    
 })
 
 // Create the post layout
@@ -142,11 +151,14 @@ const post_layout = (post, data, page) => {
 // Load the requested posts
 const load_posts = (posts, page) => {
 
+    if (document.getElementById('login-form') || document.getElementById('register-form')) {
+        window.location.href = '/'
+    }
+
     // Display feed layout and pagination and hide everything else
     if (document.getElementById('createPost') && 
-        document.getElementById('feed') !== null)
+    document.getElementById('feed') !== null)
     {
-
         document.getElementById('feed').innerHTML = ''
         document.getElementById('createPost').style.display = 'none'
         document.getElementById('feed').style.display = 'block'
