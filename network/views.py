@@ -158,7 +158,9 @@ def posts(request, posts, page_num):
             return HttpResponse(status=201)
 
         else:
-            return HttpResponseRedirect(reverse('login'))
+            return JsonResponse({
+                "error": "You must be logged in"
+            })
 
     else:
         return HttpResponse(status=404)
