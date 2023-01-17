@@ -378,7 +378,6 @@ const follow_user = (user, action, logged_user) => {
 }
 
 
-
 // Like Post
 const like_post = (id, action) => {
     

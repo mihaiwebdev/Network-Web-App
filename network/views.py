@@ -72,6 +72,7 @@ def register(request):
         return render(request, "network/register.html")
 
 
+@csrf_exempt
 def posts(request, posts, page_num):
 
     if request.method == "GET":
@@ -214,6 +215,7 @@ def profile(request, username, page_num):
         }], safe=False)
 
 
+@csrf_exempt
 def follow_user(request, follow_user):
 
     # Check if user is logged in
