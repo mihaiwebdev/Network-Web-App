@@ -85,7 +85,7 @@ const post_layout = (post, data, page) => {
 
         likeBtn.onclick = () => {
             window.location.href = '/register'
-            console.log('helo');
+
         }
     }
 
