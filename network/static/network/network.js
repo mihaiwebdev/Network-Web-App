@@ -81,6 +81,12 @@ const post_layout = (post, data, page) => {
                 postLikes.innerHTML = `${parseInt(postLikes.innerHTML) + 1 }`
             }
         }
+    } else {
+
+        likeBtn.onclick = () => {
+            window.location.href = '/register'
+            console.log('helo');
+        }
     }
 
     // Create edit button for the author and add event
