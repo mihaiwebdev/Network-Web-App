@@ -26,7 +26,7 @@ SECRET_KEY = '13kl@xtukpwe&xj2xoysxe9_6=tf@f8ewxer5n&ifnd46+6$%8'
 DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost',
-                 'https://network-web-app-production.up.railway.app/']
+                 'network-web-app-production.up.railway.app']
 
 
 # Application definition
