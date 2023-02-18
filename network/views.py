@@ -288,11 +288,10 @@ def show_comments(request, post_id):
         return JsonResponse([post.serialize()], safe=False)
 
 
-@login_required
 def add_comment(request, post_id):
 
-    if request.method == 'POST':
-
+    if request.user.is_authenticated:
+        print('ok')
         author = request.user.username
 
         data = json.loads(request.body)
@@ -307,7 +306,7 @@ def add_comment(request, post_id):
 
         post.comments.add(comment)
 
-        return HttpResponse('Comment Added')
+        return JsonResponse({"success": "Comment Added"})
 
     else:
-        return JsonResponse({"error": "POST request required."}, status=400)
+        return JsonResponse({"error": "You must be logged in"})

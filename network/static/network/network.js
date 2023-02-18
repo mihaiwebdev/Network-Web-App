@@ -510,7 +510,24 @@ const send_comment = (e, postID) => {
         body: JSON.stringify({
             'comment': comment.value
         })
-    }).then(() => show_comments(postID))
+    }).then(res => res.json())
+    .then(data => {
+        
+        if (data.error) {
+            // create and display err message
+            const msg = document.createElement('p')
+            msg.innerHTML = data.error
+            msg.className = 'err-message'
+            document.querySelector('.comment-card').appendChild(msg)
+
+            setTimeout(() => {
+                msg.remove()
+            }, 3000);
+        }
+        else {
+            show_comments(postID)
+        }
+    })
 
     comment.value = ''
 
