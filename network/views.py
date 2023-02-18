@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
 
-from .models import User, Post, User_profile
+from .models import User, Post, User_profile, Comment
 
 
 def index(request):
@@ -16,7 +16,6 @@ def index(request):
     return render(request, "network/index.html")
 
 
-@csrf_exempt
 def login_view(request):
     if request.method == "POST":
 
@@ -42,7 +41,6 @@ def logout_view(request):
     return HttpResponseRedirect(reverse("index"))
 
 
-@csrf_exempt
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -72,7 +70,6 @@ def register(request):
         return render(request, "network/register.html")
 
 
-@csrf_exempt
 def posts(request, posts, page_num):
 
     if request.method == "GET":
@@ -158,9 +155,7 @@ def posts(request, posts, page_num):
             return HttpResponse(status=201)
 
         else:
-            return JsonResponse({
-                "error": "You must be logged in"
-            })
+            return HttpResponseRedirect(reverse('login'))
 
     else:
         return HttpResponse(status=404)
@@ -217,7 +212,7 @@ def profile(request, username, page_num):
         }], safe=False)
 
 
-@csrf_exempt
+@login_required
 def follow_user(request, follow_user):
 
     # Check if user is logged in
@@ -280,3 +275,39 @@ def edit_post(request, post_id):
     return JsonResponse({
         "error": 'PUT request required'
     })
+
+
+def show_comments(request, post_id):
+
+    if request.method == 'GET':
+
+        # Get the post data
+
+        post = Post.objects.get(pk=post_id)
+
+        return JsonResponse([post.serialize()], safe=False)
+
+
+@login_required
+def add_comment(request, post_id):
+
+    if request.method == 'POST':
+
+        author = request.user.username
+
+        data = json.loads(request.body)
+
+        user = User.objects.get(username=author)
+
+        comment = Comment.objects.create(user=user, comment=data['comment'])
+
+        comment.save()
+
+        post = Post.objects.get(id=post_id)
+
+        post.comments.add(comment)
+
+        return HttpResponse('Comment Added')
+
+    else:
+        return JsonResponse({"error": "POST request required."}, status=400)

@@ -1,39 +1,55 @@
-document.querySelector('#home').addEventListener('click', () => load_posts('posts', '1'))
-document.querySelector('#allPosts').addEventListener('click', () => load_posts('posts', '1'))
-
 document.addEventListener('DOMContentLoaded', () => {
     
     // Add events for the navbar and footer
-    document.querySelector('#home').addEventListener('click', () => load_posts('posts', '1'))
-    document.querySelector('#allPosts').addEventListener('click', () => load_posts('posts', '1'))
-
+    
+    const forYou = document.querySelector('.for-you')
+    const following = document.querySelector('.following')
+    document.querySelector('#home').addEventListener('click', () => {
+        forYou.classList.add('active')
+        following.classList.remove('active')
+        load_posts('posts', '1')})
+        document.getElementById('feed').classList.add('animate')
+    document.querySelector('#allPosts').addEventListener('click', () => {
+        forYou.classList.add('active')
+        following.classList.remove('active')
+        load_posts('posts', '1')})
+    
+    following.addEventListener('click', () => {
+        forYou.classList.remove('active')
+        following.classList.add('active')
+        load_posts('following', '1')
+    })
+    
+    forYou.onclick = () => {
+        forYou.classList.add('active')
+        following.classList.remove('active')
+        load_posts('posts', '1')
+    }
+    
     // Check if other features exists and add events to them 
     if (document.getElementById('userProfile') !== null) {
         const user = document.getElementById('userProfile').innerText
         document.getElementById('userProfile').onclick = () => show_profile(user, 1)
+        
     } 
-
     if (document.querySelector('#userFollowing') !== null) {
-        document.querySelector('#userFollowing').addEventListener('click', () => load_posts('following', '1'))
+        document.querySelector('#userFollowing').addEventListener('click', () => {
+            forYou.classList.remove('active')
+            following.classList.add('active')
+            load_posts('following', '1')})
     }
-
     if (document.querySelector('#create') !== null) {
         document.querySelector('#create').addEventListener('click', create_post)
     }
   
     // By default, load the feed
-    if (document.getElementById('login-form') === null 
-        && document.getElementById('register-form') === null) {
-
-        load_posts('posts', '1');
-    }
-
-    
+    load_posts('posts', '1');
+   
 })
 
 // Create the post layout
 const post_layout = (post, data, page) => {
-
+    
     // Make the post container
     const postCard = document.createElement('div')
     postCard.className = 'd-flex flex-row post-card'
@@ -50,7 +66,7 @@ const post_layout = (post, data, page) => {
     postLikes.innerHTML = post.likes.length
     likeDiv.append(likeBtn,postLikes)
 
-    // Check if user liked or not the post
+    // Check if post is liked or not by the user 
     if (post.likes.includes(data[1].logged_user)) {
         
         likeBtn.className = 'fa-solid fa-heart'       
@@ -59,7 +75,7 @@ const post_layout = (post, data, page) => {
         likeBtn.className = 'fa-regular fa-heart'
     }
 
-    // Like and unlike logic for logged users
+    // Like and unlike logic
     if (data[1].logged_user !== '') {
 
         likeBtn.onclick = () => {
@@ -82,10 +98,7 @@ const post_layout = (post, data, page) => {
             }
         }
     } else {
-
-        likeBtn.onclick = () => {
-            window.location.href = '/register'
-        }
+        likeBtn.onclick = () => window.location.href ='/login'
     }
 
     // Create edit button for the author and add event
@@ -104,7 +117,7 @@ const post_layout = (post, data, page) => {
     // User avatar
     const postUser = document.createElement('div')
     postUser.className = 'mt-2'
-    postUser.innerHTML = '<i class="fa-solid fa-user-secret fa-2x"></i>'
+    postUser.innerHTML = '<i class="fa-solid fa-user-astronaut fa-2x"></i>'
 
     // Create header with the post author and add event listener
     const postHeader = document.createElement('div')
@@ -130,8 +143,9 @@ const post_layout = (post, data, page) => {
 
     // Comments
     const postComments = document.createElement('p')
+    postComments.className = 'post-comments'
     postComments.innerHTML = `<i class="fa-regular fa-comment mr-2"></i>${post.comments.length}`
-    // TODO: add comments functionality
+    postComments.onclick = () => show_comments(post.id)
 
     // Post actions element
     const postActions = document.createElement('div')
@@ -155,15 +169,13 @@ const post_layout = (post, data, page) => {
 
 // Load the requested posts
 const load_posts = (posts, page) => {
-
-    if (document.getElementById('login-form') || document.getElementById('register-form')) {
-        window.location.href = '/'
-    }
+    
 
     // Display feed layout and pagination and hide everything else
     if (document.getElementById('createPost') && 
-    document.getElementById('feed') !== null)
+        document.getElementById('feed') !== null)
     {
+
         document.getElementById('feed').innerHTML = ''
         document.getElementById('createPost').style.display = 'none'
         document.getElementById('feed').style.display = 'block'
@@ -171,6 +183,7 @@ const load_posts = (posts, page) => {
         document.getElementById('showProfile').style.display = 'none'
         document.getElementById('editForm').style.display = 'none'
         document.getElementById('backBtn').style.display = 'none'
+        document.getElementById('comments').style.display = 'none'
         
     
         // Get all posts or following posts
@@ -213,6 +226,7 @@ const load_posts = (posts, page) => {
 
         })
         .catch(err => console.log(err))
+
     }   
 
 }
@@ -251,6 +265,7 @@ const create_post = () => {
     document.getElementById('editForm').style.display = 'none'
     document.getElementById('pageNav').style.display = 'none'
     document.getElementById('backBtn').style.display = 'block'
+    document.getElementById('comments').style.display = 'none'
 
     document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 }
@@ -266,6 +281,7 @@ const show_profile = (name, page_num) => {
     document.getElementById('editForm').style.display = 'none'
     document.getElementById('pageNav').style.display = 'block'
     document.getElementById('backBtn').style.display = 'block'
+    document.getElementById('comments').style.display = 'none'
 
     document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 
@@ -279,10 +295,10 @@ const show_profile = (name, page_num) => {
         userName.innerHTML = `${data[0].username}'s profile`
 
         const followers = document.getElementById('followers')
-        followers.innerHTML = `Followers - ${data[0].followers.length}`
+        followers.innerHTML = `<span>Followers </span>${data[0].followers.length}`
         
         const following = document.getElementById('following')
-        following.innerHTML = `Following - ${data[0].following.length}`
+        following.innerHTML = `<span>Following </span>${data[0].following.length}`
         
         // Empty the page
         document.getElementById('posts').innerHTML = ''
@@ -377,11 +393,12 @@ const follow_user = (user, action, logged_user) => {
 }
 
 
+
 // Like Post
 const like_post = (id, action) => {
     
-    // Send to server the action like or unlike of the specific post
-    fetch('/posts/1', {
+    // Send to server the action of like or unlike of the specific post
+    fetch('show/posts/1', {
         method: 'PUT',
         headers: {
             'Accept': 'application/json',
@@ -405,7 +422,7 @@ const edit_post = (post) => {
     document.getElementById('pageNav').style.display = 'none'
     document.getElementById('editForm').style.display = 'block'
     document.getElementById('backBtn').style.display = 'block'
-
+    document.getElementById('comments').style.display = 'none'
     document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
 
     // Get post text, id, and textarea and fill in with the text
@@ -432,4 +449,70 @@ const edit_post = (post) => {
         .then(() => load_posts('posts', '1'))
 
     })
+}
+
+// Show comments
+
+const show_comments = (postID) => {
+    document.querySelector('.comment-card').innerHTML = ''
+    document.getElementById('createPost').style.display = 'none'
+    document.getElementById('feed').style.display = 'none'
+    document.getElementById('showProfile').style.display = 'none'
+    document.getElementById('editForm').style.display = 'none'
+    document.getElementById('pageNav').style.display = 'none'
+    document.getElementById('backBtn').style.display = 'block'
+    document.getElementById('comments').style.display = 'block'
+    
+    document.getElementById('backBtn').onclick = () => load_posts('posts', '1')
+
+    fetch(`/post/${postID}/comments`)
+    .then(res => res.json())
+    .then(data => {
+        
+        document.querySelector('.comment-post-user').innerText = data[0].author
+        document.querySelector('.comment-post-time').innerText = data[0].timestamp
+        document.querySelector('.comment-post-text').innerText = data[0].text
+
+        data[0].comments.map(comment => {
+
+            const author = document.createElement('h4')
+            author.innerHTML = comment.comment_by
+            author.className = 'comment-author'
+            const text = document.createElement('p')
+            text.className = 'comment-text'
+            text.innerHTML = comment.comment
+            const div = document.createElement('div')
+            div.className = 'd-flex'
+            div.append(author,text)
+            document.querySelector('.comment-card').append(div)
+
+        })
+    })
+
+    document.getElementById('submitComment').onclick = (e) => send_comment(e, postID)
+
+}
+
+
+const send_comment = (e, postID) => {
+    e.preventDefault()
+
+
+    const comment = document.querySelector('#commentText')
+
+    fetch(`/post/${postID}/add-comment`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'X-CSRFToken': csrf_token
+        },
+        body: JSON.stringify({
+            'comment': comment.value
+        })
+    }).then(() => show_comments(postID))
+
+    comment.value = ''
+
+    
 }

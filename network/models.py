@@ -44,7 +44,7 @@ class Post(models.Model):
             "author": self.author.username,
             "text": self.text,
             "likes": [user.username for user in self.likes.all()],
-            "comments": [comment.comment for comment in self.comments.all()],
-            "comment_by": [comment.username for comment in self.comments.all()],
+            "comments": [{'comment': comment.comment, 'comment_by': comment.user.username}
+                         for comment in self.comments.all()],
             "timestamp": self.timestamp.strftime("%b %d %Y, %I:%M, %p"),
         }

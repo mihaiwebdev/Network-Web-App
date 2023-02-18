@@ -15,3 +15,4 @@ Single Page Application where I used Django on the back end to build out the dat
 - Like and Unlike
 - Create Posts
 - Edit Post
+- Add comments
